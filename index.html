@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Professional 3D Printing Services by TMD. Expert SLA & FDM additive manufacturing for aerospace, medical, and industrial prototyping.">
+    <meta name="keywords"
+        content="3D printing services, SLA printing, FDM printing, rapid prototyping, Tesla Mechanical Designs, additive manufacturing, industrial 3D printing">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="canonical" href="https://3d-printing-services-delta.vercel.app/">
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+    <title>3D Printing Services |TMD </title>
+    <meta name="google-site-verification" content="peGaVW4dWKprW75k902Xs6NBPiUE8XStJt3n8t6Ser8" />
+
+    <!-- Fonts: Inter for UI, JetBrains Mono for Technical Data -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        accent: '#ef4444', // Red-500 (Tesla Red)
+                        accentHover: '#b91c1c', // Red-700
+                        text: '#f8fafc',
+                        muted: '#94a3b8'
+                    }
+                },
+                animation: {
+                    'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                },
+                keyframes: {
+                    fadeInUp: {
+                        '0%': { opacity: '0', transform: 'translateY(20px)' },
+                        '100%': { opacity: '1', transform: 'translateY(0)' },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .canvas-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            /* Allow clicks to pass through to content */
+        }
+
+        /* Updated Gradient Text */
+        .text-gradient {
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b border-slate-800 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="index.html" class="flex items-center gap-2 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div
+                        class="w-8 h-8 bg-brand-accent rounded-sm flex items-center justify-center text-brand-dark font-bold font-mono">
+                        T</div>
+                    <span class="font-bold text-xl tracking-tight text-white">TMD <span
+                            class="text-brand-accent font-light">Additive</span></span>
+                </a>
+
+                <!-- Desktop Nav -->
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#services"
+                        class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Services</a>
+                    <a href="#applications"
+                        class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Applications</a>
+                    <a href="blog.html"
+                        class="text-sm font-medium text-brand-accent hover:text-white transition-colors">Blog</a>
+                    <a href="#contact"
+                        class="px-4 py-2 bg-brand-accent text-brand-dark font-bold rounded hover:bg-brand-accentHover transition-colors">Get
+                        Quote</a>
+                </div>
+
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')"
+                        class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="hidden md:hidden bg-slate-900 border-b border-slate-800" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#services"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Services</a>
+                <a href="#applications"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:text-white hover:bg-slate-800">Applications</a>
+                <a href="blog.html"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-brand-accent hover:text-white hover:bg-slate-800">Blog</a>
+                <a href="#contact"
+                    class="block px-3 py-2 rounded-md text-base font-medium text-white bg-brand-accent hover:bg-brand-accentHover">Get
+                    Quote</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <!-- 3D Background Container -->
+        <div id="canvas-container" class="canvas-container opacity-60"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-start pt-20">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 text-xs font-mono mb-6 animate-fade-in-up">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                NEXT-GEN ADDITIVE MANUFACTURING
+            </div>
+
+            <h1 class="text-5xl md:text-7xl font-bold tracking-tight mb-6 max-w-4xl animate-fade-in-up"
+                style="animation-delay: 0.1s;">
+                Engineering Reality.<br>
+                <span class="text-gradient">Layer by Layer.</span>
+            </h1>
+
+            <p class="text-xl text-brand-muted max-w-2xl mb-10 leading-relaxed animate-fade-in-up"
+                style="animation-delay: 0.2s;">
+                We bridge the gap between digital design and physical functionality. Leveraging the engineering prowess
+                of <a href="https://www.teslamechanicaldesigns.com/3d-printing-services.php"
+                    class="text-red-400 hover:text-red-300 transition-colors">Tesla Mechanical
+                    Designs</a>, our facility delivers production-grade parts using advanced SLA and FDM ecosystems.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style="animation-delay: 0.3s;">
+                <a href="#contact"
+                    class="flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accentHover text-brand-dark px-8 py-4 rounded-lg font-bold transition-all shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                    Start Your Project
+                    <i class="ph-bold ph-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Trust Indicators -->
+            <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 text-slate-500 font-mono text-sm animate-fade-in-up"
+                style="animation-delay: 0.4s;">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-shield-check text-brand-accent"></i>
+                    <span>IP SECURE</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-clock-countdown text-brand-accent"></i>
+                    <span>RAPID TURNAROUND</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-ruler-precision text-brand-accent"></i>
+                    <span>MICRON ACCURACY</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Gradient Overlay -->
+        <div class="absolute bottom-0 w-full h-32 bg-gradient-to-t from-brand-dark to-transparent z-0"></div>
+    </div>
+
+    <!-- Stats Section -->
+    <section class="border-y border-slate-800 bg-brand-light/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="p-6">
+                    <h3 class="text-4xl font-bold text-white mb-2">100%</h3>
+                    <p class="text-brand-muted uppercase text-sm tracking-wider">Satisfaction Rate</p>
+                </div>
+                <div class="p-6 border-l border-r border-slate-800/50">
+                    <h3 class="text-4xl font-bold text-white mb-2">Expert</h3>
+                    <p class="text-brand-muted uppercase text-sm tracking-wider">Engineering Evaluation</p>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-4xl font-bold text-white mb-2">Global</h3>
+                    <p class="text-brand-muted uppercase text-sm tracking-wider">Delivery Network</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Core Capabilities</h2>
+                <p class="text-brand-muted max-w-2xl mx-auto">More than just a print farm. We offer comprehensive <a
+                        href="https://www.teslamechanicaldesigns.com/3d-printing-services.php"
+                        class="text-slate-300 hover:text-red-400 transition-colors border-b border-red-500/30">manufacturing
+                        solutions</a> tailored to your specific mechanical needs.
+                </p>
+            </div>
+
+            <!-- Changed grid to 3 cols -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- SLA Service Card -->
+                <div
+                    class="group relative bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-brand-accent transition-all duration-300 overflow-hidden h-full flex flex-col justify-end min-h-[500px]">
+                    <div class="absolute inset-0 z-0">
+                        <img src="assets/images/sla-printer.png" alt="SLA Printer" title="High Precision SLA Printer"
+                            width="800" height="600" loading="lazy"
+                            class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-100 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent">
+                        </div>
+                    </div>
+
+                    <div
+                        class="relative z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <div
+                            class="w-12 h-12 bg-red-500/20 backdrop-blur-md rounded-lg flex items-center justify-center text-red-400 mb-6 border border-red-500/30">
+                            <i class="ph-duotone ph-drop text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">High-Res SLA</h3>
+                        <p class="text-slate-300 mb-6 leading-relaxed">
+                            The gold standard for surface finish and intricacy. Using UV-cured photopolymers to achieve
+                            micron-level accuracy for prototypes and master molds.
+                        </p>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-red-500"></i>
+                                <span>Micron-level accuracy</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-red-500"></i>
+                                <span>Glass-smooth surface finish</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-red-500"></i>
+                                <span>Castable & High-Temp Resins</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FDM Service Card -->
+                <div
+                    class="group relative bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-brand-accent transition-all duration-300 overflow-hidden h-full flex flex-col justify-end min-h-[500px]">
+                    <div class="absolute inset-0 z-0">
+                        <img src="assets/images/fdm-printer.png" alt="FDM Printer" title="Industrial FDM Printer"
+                            width="800" height="600" loading="lazy"
+                            class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-100 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent">
+                        </div>
+                    </div>
+
+                    <div
+                        class="relative z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <div
+                            class="w-12 h-12 bg-orange-500/20 backdrop-blur-md rounded-lg flex items-center justify-center text-orange-400 mb-6 border border-orange-500/30">
+                            <i class="ph-duotone ph-cube text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Engineering FDM</h3>
+                        <p class="text-slate-300 mb-6 leading-relaxed">
+                            Robust parts for hostile environments. We print with industrial-grade thermoplastics (PC,
+                            ASA, Carbon Nylon) perfect for jigs, fixtures, and end-use parts.
+                        </p>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-orange-400"></i>
+                                <span>Large build volume (500mm+)</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-orange-400"></i>
+                                <span>Functional Engineering Grade</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-orange-400"></i>
+                                <span>Materials: PLA, ABS, PETG, TPU</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mechanical & Composites Card -->
+                <div
+                    class="group relative bg-slate-800 rounded-2xl p-8 border border-slate-700 hover:border-brand-accent transition-all duration-300 overflow-hidden h-full flex flex-col justify-end min-h-[500px]">
+                    <div class="absolute inset-0 z-0">
+                        <img src="assets/images/mechanical-part.png" alt="Composite Part"
+                            title="Mechanical Composite Part" width="800" height="600" loading="lazy"
+                            class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity duration-500 scale-100 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent">
+                        </div>
+                    </div>
+
+                    <div
+                        class="relative z-10 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <div
+                            class="w-12 h-12 bg-purple-500/20 backdrop-blur-md rounded-lg flex items-center justify-center text-purple-400 mb-6 border border-purple-500/30">
+                            <i class="ph-duotone ph-gear-six text-2xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Composite Reinforcement</h3>
+                        <p class="text-slate-300 mb-6 leading-relaxed">
+                            Forget machining. Continual fiber reinforcement allows us to produce composite parts with
+                            strength-to-weight ratios rivaling aluminum.
+                        </p>
+
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-purple-400"></i>
+                                <span>Strength of 6061 Aluminum</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-purple-400"></i>
+                                <span>Extreme impact resistance</span>
+                            </div>
+                            <div class="flex items-center gap-3 text-sm text-slate-300">
+                                <i class="ph-fill ph-check-circle text-purple-400"></i>
+                                <span>Onyx + Continuous Fiber</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Model Preview Section -->
+    <section class="py-24 bg-brand-dark relative overflow-hidden text-center border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="mb-12">
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-400 text-xs font-mono mb-4">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                    INTERACTIVE DEMO
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Explore Our Precision</h2>
+                <p class="text-brand-muted max-w-2xl mx-auto">
+                    Interact with a real-time 3D generated model. This demonstrates the level of complex geometry
+                    resolution capable with our SLA and FDM systems. Drag to rotate.
+                </p>
+            </div>
+
+            <div
+                class="relative w-full max-w-4xl mx-auto h-[500px] bg-slate-900/50 rounded-2xl border border-slate-700 overflow-hidden shadow-2xl">
+                <div id="interactive-model-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+                <!-- Overlay UI -->
+                <div class="absolute bottom-6 left-0 w-full flex justify-center gap-4 pointer-events-none">
+                    <div
+                        class="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs font-mono text-slate-300">
+                        <i class="ph-bold ph-mouse-left mr-2"></i>DRAG TO ROTATE
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Glow -->
+        <div
+            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-purple-900/20 blur-[120px] rounded-full pointer-events-none -z-10">
+        </div>
+    </section>
+
+    <!-- Why Us / Core Values -->
+    <section class="py-24 bg-brand-light relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Outpace the Competition</h2>
+                    <p class="text-slate-400 mb-8 text-lg">
+                        In the modern product development cycle, speed and precision are non-negotiable. TMD Additive
+                        provides the specialized infrastructure you need to iterate faster.
+                    </p>
+
+                    <div class="space-y-8">
+                        <div class="flex gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                <i class="ph-fill ph-lock-key text-brand-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white">IP Protection</h4>
+                                <p class="text-slate-400 text-sm mt-1">Your data is yours. We execute strict
+                                    confidentiality protocols to ensure your proprietary designs remain secure within
+                                    our ecosystem.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                <i class="ph-fill ph-trend-down text-brand-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white">Cost Reduction</h4>
+                                <p class="text-slate-400 text-sm mt-1">No tooling costs. No minimum order quantities.
+                                    Produce one part or one hundred at a fraction of traditional manufacturing costs.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div
+                                class="flex-shrink-0 w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
+                                <i class="ph-fill ph-rocket-launch text-brand-accent text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-bold text-white">Iterative Velocity</h4>
+                                <p class="text-slate-400 text-sm mt-1">Fail fast, succeed sooner. Rapidly test form,
+                                    fit, and function to validate your engineering decisions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Decorative Graphic -->
+                <div
+                    class="relative h-96 bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 flex items-center justify-center">
+                    <div
+                        class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20">
+                    </div>
+                    <!-- Abstract representation of layers -->
+                    <div
+                        class="relative z-10 w-64 h-64 border-2 border-brand-accent/30 rounded-full flex items-center justify-center animate-pulse-slow">
+                        <div
+                            class="w-48 h-48 border-2 border-brand-accent/50 rounded-full flex items-center justify-center">
+                            <div
+                                class="w-32 h-32 border-2 border-brand-accent rounded-full flex items-center justify-center bg-brand-accent/5 backdrop-blur-sm">
+                                <i class="ph-duotone ph-cube text-6xl text-brand-accent"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Projects / Gallery Section -->
+    <section id="gallery" class="py-24 bg-brand-dark relative overflow-hidden">
+        <!-- Background decorative element -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 opacity-10 pointer-events-none">
+            <div class="absolute top-20 left-10 w-64 h-64 border border-brand-accent rounded-full"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 border border-brand-accent rounded-full"></div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <div class="max-w-2xl">
+                    <h2 class="text-3xl md:text-4xl font-bold mb-4">Featured Projects</h2>
+                    <p class="text-brand-muted">Explore how we leverage additive manufacturing to solve complex
+                        engineering challenges across industries.</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <a href="#contact"
+                        class="text-brand-accent hover:text-white font-mono text-sm flex items-center gap-2 group transition-colors">
+                        VIEW FULL PORTFOLIO
+                        <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Project 1 -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/mechanical-part.png" alt="Intake Manifold"
+                            title="Intake Manifold Prototype" width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-red-400/30">
+                            SLA</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Intake Manifold Prototype</h3>
+                        <p class="text-slate-400 text-sm mb-4">Complex internal geometry for airflow testing using
+                            High-Temp Resin to withstand dyno conditions.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-ruler"></i> 0.05mm Layer
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/robotic-gripper.png" alt="Robotic Gripper"
+                            title="Industrial Robotic Gripper" width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-orange-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-orange-400/30">
+                            FDM</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Robotic End-Effector</h3>
+                        <p class="text-slate-400 text-sm mb-4">End-of-arm tooling printed in Carbon Fiber Nylon for
+                            extreme stiffness and wear resistance.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-barbell"></i> High Strength
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/medical-device.png" alt="Medical Device"
+                            title="Medical Device Prototyping" width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-red-400/30">
+                            SLA</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Medical Enclosure</h3>
+                        <p class="text-slate-400 text-sm mb-4">Ergonomic handheld device prototype with snap-fits,
+                            printed in ABS-like resin for fit-check.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-hand-palm"></i> Smooth Finish
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 4 (New) -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/aerospace-bracket.png" alt="Aerospace Bracket"
+                            title="Aerospace Mounting Bracket" width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-orange-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-orange-400/30">
+                            FDM</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Aerospace Bracket</h3>
+                        <p class="text-slate-400 text-sm mb-4">Lightweight mounting bracket printed in ULTEM 9085 for
+                            flame retardancy and thermal stability.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-fire"></i> Flame Retardant
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 5 (New) -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/lattice.png" alt="Drone Frame" title="Structural Lattice Drone Frame"
+                            width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-purple-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-purple-400/30">
+                            R&D</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Structural Lattice</h3>
+                        <p class="text-slate-400 text-sm mb-4">Topologically optimized internal lattice structures for
+                            maximum strength-to-weight ratio.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-hexagon"></i> Research
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 6 (New) -->
+                <div
+                    class="group bg-slate-800/40 border border-slate-700 hover:border-brand-accent rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-red-900/20">
+                    <div class="h-48 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                        <img src="assets/images/generative-part.png" alt="Generative Design"
+                            title="AI Generative Component" width="600" height="400" loading="lazy"
+                            class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        <div
+                            class="absolute top-3 right-3 bg-red-500/80 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded border border-red-400/30">
+                            SLA</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-lg font-bold text-white mb-2">Generative Component</h3>
+                        <p class="text-slate-400 text-sm mb-4">AI-driven design methodology creating organic structures
+                            impossible to manufacture by traditional means.</p>
+                        <div class="flex items-center gap-2 text-xs text-brand-muted font-mono">
+                            <i class="ph-fill ph-brain"></i> AI Design
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases -->
+    <section id="applications" class="py-24">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold mb-12 text-center">Applications</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div
+                    class="p-6 bg-slate-800/30 border border-slate-700 hover:bg-slate-800 transition-colors rounded-xl">
+                    <div class="text-brand-accent mb-4 text-xs font-mono uppercase tracking-widest">Engineering</div>
+                    <h3 class="text-xl font-bold mb-3">Customized Components</h3>
+                    your assembly line efficiency.</p>
+                </div>
+                <div
+                    class="p-6 bg-slate-800/30 border border-slate-700 hover:bg-slate-800 transition-colors rounded-xl">
+                    <div class="text-brand-accent mb-4 text-xs font-mono uppercase tracking-widest">Manufacturing</div>
+                    <h3 class="text-xl font-bold mb-3">Tool & Die Making</h3>
+                    <p class="text-slate-400 text-sm">Rapidly produce bridge tooling and molds to validate production
+                        processes before cutting steel.</p>
+                </div>
+                <div
+                    class="p-6 bg-slate-800/30 border border-slate-700 hover:bg-slate-800 transition-colors rounded-xl">
+                    <div class="text-brand-accent mb-4 text-xs font-mono uppercase tracking-widest">R & D</div>
+                    <h3 class="text-xl font-bold mb-3">Material Research</h3>
+                    <p class="text-slate-400 text-sm">Investigate novel material properties and complex lattice
+                        structures impossible to machine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action / Contact -->
+    <section id="contact"
+        class="py-24 bg-gradient-to-b from-brand-dark to-slate-900 relative border-t border-slate-800">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-slate-800/80 backdrop-blur-xl rounded-2xl border border-slate-700 p-8 md:p-12 shadow-2xl">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-bold mb-4">Ready to Print?</h2>
+                    <p class="text-slate-400">Upload your STL/STEP files or describe your project. Our engineers provide
+                        expert evaluation to ensure printability and cost-efficiency.</p>
+                </div>
+
+                <form class="space-y-6"
+                    onsubmit="event.preventDefault(); alert('In a real deployment, this would submit your files to the TMD backend.');">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Name</label>
+                            <input type="text"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                                placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                            <input type="email"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                                placeholder="john@company.com">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-300 mb-2">Project Details</label>
+                        <textarea rows="4"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                            placeholder="Describe materials, quantities, and application requirements..."></textarea>
+                    </div>
+
+                    <button type="submit"
+                        class="w-full bg-brand-accent hover:bg-brand-accentHover text-brand-dark font-bold py-4 rounded-lg transition-all shadow-lg shadow-red-500/20">
+                        Request Quote & Analysis
+                    </button>
+
+                    <p class="text-center text-xs text-slate-500 mt-4">
+                        By submitting, you agree to our Privacy Policy. All uploads are encrypted.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- Scripts -->
+    <script>
+        // --- 3D Background Animation with Three.js ---
+        const init3D = () => {
+            const container = document.getElementById('canvas-container');
+            const scene = new THREE.Scene();
+
+            // Camera setup
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            // Renderer setup
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Create a complex wireframe geometry (Icosahedron)
+            const geometry = new THREE.IcosahedronGeometry(2.5, 1);
+
+            // Material: Electric Blue Wireframe
+            const material = new THREE.MeshBasicMaterial({
+                color: 0xef4444,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.15
+            });
+
+            const sphere = new THREE.Mesh(geometry, material);
+            scene.add(sphere);
+
+            // Add inner geometric core
+            const innerGeo = new THREE.OctahedronGeometry(1.2, 0);
+            const innerMat = new THREE.MeshBasicMaterial({
+                color: 0xffffff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.05
+            });
+            const innerCore = new THREE.Mesh(innerGeo, innerMat);
+            scene.add(innerCore);
+
+            // Particles
+            const particlesGeo = new THREE.BufferGeometry();
+            const particlesCount = 200;
+            const posArray = new Float32Array(particlesCount * 3);
+
+            for (let i = 0; i < particlesCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 15;
+            }
+
+            particlesGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const particlesMat = new THREE.PointsMaterial({
+                size: 0.02,
+                color: 0xef4444,
+                transparent: true,
+                opacity: 0.4
+            });
+            const particlesMesh = new THREE.Points(particlesGeo, particlesMat);
+            scene.add(particlesMesh);
+
+            // Mouse interaction
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetX = 0;
+            let targetY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX);
+                mouseY = (event.clientY - windowHalfY);
+            });
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            // Animation Loop
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                targetX = mouseX * 0.001;
+                targetY = mouseY * 0.001;
+
+                // Rotate main sphere
+                sphere.rotation.y += 0.002;
+                sphere.rotation.x += 0.001;
+
+                // Interactive rotation easing
+                sphere.rotation.y += 0.05 * (targetX - sphere.rotation.y);
+                sphere.rotation.x += 0.05 * (targetY - sphere.rotation.x);
+
+                // Counter-rotate inner core
+                innerCore.rotation.y -= 0.003;
+                innerCore.rotation.z += 0.002;
+
+                // Slowly move particles
+                particlesMesh.rotation.y = -mouseX * 0.0002;
+                particlesMesh.rotation.x = -mouseY * 0.0002;
+
+                renderer.render(scene, camera);
+            };
+
+            animate();
+        };
+
+        // Initialize 3D scene when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            init3D();
+            initInteractiveModel();
+        });
+
+        // --- New Interactive Mechanical Model ---
+        const initInteractiveModel = () => {
+            const container = document.getElementById('interactive-model-container');
+            if (!container) return;
+
+            const scene = new THREE.Scene();
+            // scene.background = new THREE.Color(0x0f172a); // Match brand dark if needed, or keep transparent
+
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(5, 5, 8);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Controls logic (Simple Drag)
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+
+            const mechGroup = new THREE.Group();
+
+            // -- Materials --
+            const wireMat = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true, transparent: true, opacity: 0.15 });
+            const solidMat = new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true, transparent: true, opacity: 0.05 });
+            const edgeMat = new THREE.LineBasicMaterial({ color: 0xfca5a5, transparent: true, opacity: 0.3 });
+
+            // 1. Main Gear
+            const gearGeo = new THREE.CylinderGeometry(2, 2, 0.5, 32);
+            const gear = new THREE.Mesh(gearGeo, solidMat);
+            gear.rotation.x = Math.PI / 2;
+            mechGroup.add(gear);
+
+            const gearWire = new THREE.Mesh(gearGeo, wireMat);
+            gearWire.rotation.x = Math.PI / 2;
+            mechGroup.add(gearWire);
+
+            // 2. Teeth
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2;
+                const toothGeo = new THREE.BoxGeometry(0.6, 0.4, 0.5);
+                const tooth = new THREE.Mesh(toothGeo, wireMat);
+                tooth.position.set(Math.cos(angle) * 2.2, Math.sin(angle) * 2.2, 0);
+                tooth.rotation.z = angle;
+                mechGroup.add(tooth);
+            }
+
+            // 3. Central Axis / Turbine
+            const turbineGroup = new THREE.Group();
+            for (let i = 0; i < 8; i++) {
+                const bladeGeo = new THREE.BoxGeometry(1.5, 0.2, 0.1);
+                const blade = new THREE.Mesh(bladeGeo, new THREE.MeshBasicMaterial({ color: 0xf97316, wireframe: true, opacity: 0.3 }));
+                blade.rotation.z = (i / 8) * Math.PI * 2;
+                blade.rotation.x = 0.5; // Slight pitch
+                turbineGroup.add(blade);
+            }
+            mechGroup.add(turbineGroup);
+
+            // 4. Outer Ring
+            const ringGeo = new THREE.TorusGeometry(3.5, 0.1, 16, 64);
+            const ring = new THREE.Mesh(ringGeo, edgeMat);
+            mechGroup.add(ring);
+
+            scene.add(mechGroup);
+
+            // Events
+            container.addEventListener('mousedown', (e) => { isDragging = true; });
+            document.addEventListener('mouseup', () => { isDragging = false; });
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = {
+                        x: e.offsetX - previousMousePosition.x,
+                        y: e.offsetY - previousMousePosition.y
+                    };
+                    targetRotationY += deltaMove.x * 0.01;
+                    targetRotationX += deltaMove.y * 0.01;
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+
+            // Animation
+            const animate = () => {
+                requestAnimationFrame(animate);
+
+                // Smooth rotation interpolation
+                mechGroup.rotation.y += 0.05 * (targetRotationY - mechGroup.rotation.y);
+                mechGroup.rotation.x += 0.05 * (targetRotationX - mechGroup.rotation.x);
+
+                // Constant idle rotation
+                mechGroup.rotation.y += 0.002;
+                turbineGroup.rotation.z -= 0.02; // Spin turbine
+
+                renderer.render(scene, camera);
+            };
+            animate();
+
+            // Resize
+            window.addEventListener('resize', () => {
+                if (container) {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+            });
+        };
+
+        // Navbar blur effect on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-lg');
+                nav.classList.replace('border-slate-800', 'border-slate-700');
+            } else {
+                nav.classList.remove('shadow-lg');
+                nav.classList.replace('border-slate-700', 'border-slate-800');
+            }
+        });
+    </script>
+</body>
+
+</html>
